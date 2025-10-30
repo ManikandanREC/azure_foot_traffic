@@ -8,7 +8,7 @@ pool:
 
 variables:
   # 👇 CHANGE THESE 2 VARIABLES
-  AZURE_WEBAPP_NAME: 'foot-traffic-g8f9euhue5hbfkfm'   # your actual App Service name
+  AZURE_WEBAPP_NAME: 'foot-traffic'   # your actual App Service name
   AZURE_SERVICE_CONNECTION: 'foot-traffic'  # name of service connection (we’ll create it below)
   PYTHON_VERSION: '3.10'
 

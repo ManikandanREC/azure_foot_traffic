@@ -1,0 +1,53 @@
+# Azure Pipeline for Flask App Deployment
+
+trigger:
+- main   # or 'master' if your repo uses master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  # 👇 CHANGE THESE 2 VARIABLES
+  AZURE_WEBAPP_NAME: 'foot-traffic-g8f9euhue5hbfkfm'   # your actual App Service name
+  AZURE_SERVICE_CONNECTION: 'foot-traffic'  # name of service connection (we’ll create it below)
+  PYTHON_VERSION: '3.10'
+
+steps:
+# --- Step 1: Checkout code from repository ---
+- task: Checkout@1
+  displayName: 'Checkout source code'
+
+# --- Step 2: Set up Python environment ---
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(PYTHON_VERSION)'
+  displayName: 'Set up Python $(PYTHON_VERSION)'
+
+# --- Step 3: Install dependencies ---
+- script: |
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+# --- Step 4: Archive project for deployment ---
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(AZURE_WEBAPP_NAME).zip'
+    replaceExistingArchive: true
+  displayName: 'Archive project files'
+
+# --- Step 5: Deploy to Azure Web App ---
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'foot-traffic'
+    appType: 'webApp'
+    appName: 'foot-traffic'
+    deployToSlotOrASE: true
+    resourceGroupName: 'foot-traffic'
+    slotName: 'production'
+    package: '$(Build.ArtifactStagingDirectory)/foot-traffic.zip'
+    deploymentMethod: 'auto'
+  displayName: 'Deploy to Azure Web App'
